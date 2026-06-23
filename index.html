@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Echo — Preserve Every Voice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Animated background layers -->
+  <div class="bg-gradient" aria-hidden="true"></div>
+  <div class="noise" aria-hidden="true"></div>
+
+  <!-- Loading screen -->
+  <div id="loading" aria-label="Loading Echo">
+    <div class="loading-logo">ECHO</div>
+    <div class="loading-bar"><div class="loading-fill"></div></div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="main-nav" role="navigation" aria-label="Main navigation">
+    <div class="nav-logo" onclick="goto('home')" role="button" tabindex="0" aria-label="Echo home">ECHO</div>
+    <ul class="nav-links" role="list">
+      <li><a class="nav-link" data-view="home" onclick="goto('home')">Home</a></li>
+      <li id="nav-profiles-li" style="display:none"><a class="nav-link" data-view="dashboard" onclick="requireAuth('dashboard')">Profiles</a></li>
+    </ul>
+    <div class="nav-actions" id="nav-actions">
+      <button class="btn btn-ghost" onclick="goto('auth')">Log in</button>
+      <button class="btn btn-primary" onclick="goto('auth')">Get started</button>
+    </div>
+  </nav>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+  <!-- Profile creation modal -->
+  <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
+    <div class="modal-card glass-card">
+      <h2 id="modal-heading" style="font-size:20px;font-weight:600;margin-bottom:6px">Create a profile</h2>
+      <p style="font-size:14px;color:var(--w50);margin-bottom:1.5rem" id="modal-sub">Choose the type of profile you want to build.</p>
+
+      <div id="modal-step-type">
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <div class="modal-type-card" onclick="selectModalType('alive')">
+            <div class="modal-type-icon alive-icon">✦</div>
+            <div class="modal-type-title">Living Profile</div>
+            <div class="modal-type-desc">Capture your personality, voice, and values while you're here.</div>
+          </div>
+          <div class="modal-type-card" onclick="selectModalType('deceased')">
+            <div class="modal-type-icon deceased-icon">◆</div>
+            <div class="modal-type-title">In Memoriam</div>
+            <div class="modal-type-desc">Preserve the essence of someone you've loved and lost.</div>
+          </div>
+        </div>
+      </div>
+
+      <div id="modal-step-name" style="display:none">
+        <div class="form-group">
+          <label class="form-label" id="modal-name-label">Name</label>
+          <input type="text" class="form-input" id="modal-name" placeholder="Full name..." onkeydown="if(event.key==='Enter')confirmCreate()">
+        </div>
+        <div id="modal-name-error" class="form-error" style="display:none;margin-top:8px"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;margin-top:1.5rem">
+        <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+        <button class="btn btn-primary" id="modal-confirm" onclick="confirmCreate()" style="display:none;flex:1">Create profile →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ VIEWS ═══ -->
+
+  <!-- HOME -->
+  <section class="view active" id="view-home" aria-label="Home">
+    <div class="home-hero">
+      <div class="echo-title" aria-label="Echo">ECHO</div>
+      <p class="home-tagline">Every voice deserves to last.<br>Preserve the essence of a life — or your own.</p>
+      <div class="waveform" id="waveform" aria-hidden="true"></div>
+      <div class="home-cards">
+        <div class="home-type-card" onclick="homeStart('alive')">
+          <span class="home-card-icon alive-icon">✦</span>
+          <div class="home-card-title">Living Profile</div>
+          <div class="home-card-desc">Map yourself — your voice, values, and world — in rich detail.</div>
+        </div>
+        <div class="home-type-card" onclick="homeStart('deceased')">
+          <span class="home-card-icon deceased-icon">◆</span>
+          <div class="home-card-title">In Memoriam</div>
+          <div class="home-card-desc">Honour someone you've lost by preserving everything they were.</div>
+        </div>
+      </div>
+      <p class="home-footnote">Your data stays on your device. Exported as JSON for AI use.</p>
+    </div>
+  </section>
+
+  <!-- AUTH -->
+  <section class="view" id="view-auth" aria-label="Authentication">
+    <div class="auth-wrap">
+      <div class="glass-card auth-card">
+        <div class="auth-logo">ECHO</div>
+        <p class="auth-subtitle" id="auth-subtitle">Sign in to your account</p>
+        <div class="auth-tabs" role="tablist">
+          <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" onclick="setAuthMode('login')">Log in</button>
+          <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" onclick="setAuthMode('register')">Register</button>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="form-group">
+            <label class="form-label" for="auth-user">Username</label>
+            <input type="text" class="form-input" id="auth-user" autocomplete="username" placeholder="your_username" onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="auth-pass">Password</label>
+            <input type="password" class="form-input" id="auth-pass" autocomplete="current-password" placeholder="at least 6 characters" onkeydown="if(event.key==='Enter')doAuth()">
+          </div>
+          <div class="form-error" id="auth-error" style="display:none" role="alert"></div>
+          <button class="btn btn-primary" id="auth-btn" onclick="doAuth()" style="width:100%;padding:12px;font-size:15px">Log in</button>
+        </div>
+        <p class="auth-note" id="auth-note"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DASHBOARD -->
+  <section class="view" id="view-dashboard" aria-label="Your profiles">
+    <div class="dash-wrap">
+      <div class="dash-header">
+        <div>
+          <h1 id="dash-greeting" style="font-size:26px;font-weight:600;margin-bottom:4px"></h1>
+          <p id="dash-sub" style="font-size:14px;color:var(--w50)"></p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ New profile</button>
+      </div>
+      <div class="profile-grid" id="profile-grid" role="list"></div>
+    </div>
+  </section>
+
+  <!-- QUESTIONNAIRE -->
+  <section class="view" id="view-questionnaire" aria-label="Questionnaire">
+    <div class="q-layout">
+      <aside class="q-sidebar" id="q-sidebar" aria-label="Categories"></aside>
+      <main class="q-main" id="q-main"></main>
+    </div>
+  </section>
+
+  <!-- PROFILE VIEW -->
+  <section class="view" id="view-profile" aria-label="Profile view">
+    <div class="profile-view-wrap">
+      <div class="profile-view-inner" id="profile-view-inner"></div>
+    </div>
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
