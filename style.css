@@ -142,6 +142,168 @@ a { text-decoration:none; cursor:pointer; }
 }
 @keyframes loadBar { to { width:100%; } }
 
+
+/* ==================================
+   FOOTER
+================================== */
+
+.echo-footer{
+
+    margin-top:150px;
+
+    position:relative;
+
+    overflow:hidden;
+
+    border-top:1px solid rgba(255,255,255,.08);
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(255,255,255,.01),
+            rgba(255,255,255,.04)
+        );
+}
+
+/* ==================================
+   LARGE SCROLLING BANNER
+================================== */
+
+.footer-banner{
+
+    overflow:hidden;
+
+    width:100%;
+
+    padding:50px 0;
+
+    border-bottom:1px solid rgba(255,255,255,.08);
+}
+
+.footer-track{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:60px;
+
+    width:max-content;
+
+    animation:footerMarquee 35s linear infinite;
+}
+
+.footer-track span{
+
+    font-family:'Space Grotesk',sans-serif;
+
+    font-size:clamp(70px,10vw,180px);
+
+    font-weight:700;
+
+    letter-spacing:.08em;
+
+    white-space:nowrap;
+
+    color:transparent;
+
+    -webkit-text-stroke:1px rgba(255,255,255,.35);
+
+    text-shadow:
+        0 0 30px rgba(0,192,96,.15),
+        0 0 80px rgba(0,192,96,.08);
+
+    text-transform:uppercase;
+}
+
+@keyframes footerMarquee{
+
+    from{
+        transform:translateX(0);
+    }
+
+    to{
+        transform:translateX(-50%);
+    }
+}
+
+/* ==================================
+   FOOTER CONTENT
+================================== */
+
+.footer-bottom{
+
+    max-width:1400px;
+
+    margin:auto;
+
+    padding:80px 40px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    align-items:center;
+
+    gap:20px;
+}
+
+.footer-logo{
+
+    font-family:'Space Grotesk',sans-serif;
+
+    font-size:42px;
+
+    font-weight:700;
+
+    letter-spacing:.25em;
+
+    color:transparent;
+
+    -webkit-text-stroke:1px #00c060;
+}
+
+.footer-sub{
+
+    color:rgba(255,255,255,.55);
+
+    font-size:15px;
+
+    letter-spacing:.15em;
+
+    text-transform:uppercase;
+}
+
+.footer-links{
+
+    display:flex;
+
+    gap:30px;
+
+    flex-wrap:wrap;
+}
+
+.footer-links a{
+
+    color:rgba(255,255,255,.5);
+
+    transition:.3s;
+}
+
+.footer-links a:hover{
+
+    color:#00c060;
+}
+
+.footer-copy{
+
+    color:rgba(255,255,255,.3);
+
+    font-size:13px;
+}
+
+
+
 /* ══════════════════════════════════════
    NAVIGATION
 ══════════════════════════════════════ */
