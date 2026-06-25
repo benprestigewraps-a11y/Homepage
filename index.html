@@ -6,131 +6,230 @@
   <title>Echo — Preserve Every Voice</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-  <!-- Animated background layers -->
-  <div class="bg-gradient" aria-hidden="true"></div>
+  <!-- Background layers (mouse-driven) -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
   <div class="noise" aria-hidden="true"></div>
+  <div class="cursor-glow" id="cursor-glow" aria-hidden="true"></div>
 
-  <!-- Loading screen -->
+  <!-- Loading -->
   <div id="loading" aria-label="Loading Echo">
     <div class="loading-logo">ECHO</div>
+    <div class="loading-tagline">Preserve every voice</div>
     <div class="loading-bar"><div class="loading-fill"></div></div>
   </div>
 
   <!-- Navigation -->
-  <nav id="main-nav" role="navigation" aria-label="Main navigation">
+  <nav id="main-nav" aria-label="Main navigation">
     <div class="nav-logo" onclick="goto('home')" role="button" tabindex="0" aria-label="Echo home">ECHO</div>
-    <ul class="nav-links" role="list">
+    <ul class="nav-links">
       <li><a class="nav-link" data-view="home" onclick="goto('home')">Home</a></li>
-      <li id="nav-profiles-li" style="display:none"><a class="nav-link" data-view="dashboard" onclick="requireAuth('dashboard')">Profiles</a></li>
+      <li id="nav-profiles-li" style="display:none">
+        <a class="nav-link" data-view="dashboard" onclick="requireAuth('dashboard')">My Profiles</a>
+      </li>
     </ul>
     <div class="nav-actions" id="nav-actions">
-      <button class="btn btn-ghost" onclick="goto('auth')">Log in</button>
-      <button class="btn btn-primary" onclick="goto('auth')">Get started</button>
+      <button class="btn btn-ghost btn-sm" onclick="showAuth('login')">Log in</button>
+      <button class="btn btn-primary btn-sm" onclick="showAuth('signup')">Get started</button>
     </div>
   </nav>
 
-  <!-- Toast notification -->
+  <!-- Toast -->
   <div class="toast" id="toast" role="alert" aria-live="polite"></div>
 
-  <!-- Profile creation modal -->
-  <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-heading">
-    <div class="modal-card glass-card">
-      <h2 id="modal-heading" style="font-size:20px;font-weight:600;margin-bottom:6px">Create a profile</h2>
-      <p style="font-size:14px;color:var(--w50);margin-bottom:1.5rem" id="modal-sub">Choose the type of profile you want to build.</p>
-
-      <div id="modal-step-type">
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <div class="modal-type-card" onclick="selectModalType('alive')">
-            <div class="modal-type-icon alive-icon">✦</div>
-            <div class="modal-type-title">Living Profile</div>
-            <div class="modal-type-desc">Capture your personality, voice, and values while you're here.</div>
-          </div>
-          <div class="modal-type-card" onclick="selectModalType('deceased')">
-            <div class="modal-type-icon deceased-icon">◆</div>
-            <div class="modal-type-title">In Memoriam</div>
-            <div class="modal-type-desc">Preserve the essence of someone you've loved and lost.</div>
-          </div>
-        </div>
+  <!-- New Profile Modal -->
+  <div class="modal-overlay" id="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
+    <div class="modal-card glass">
+      <h2 id="modal-title" class="modal-heading">Create a profile</h2>
+      <p class="modal-sub">Choose the type of profile you want to build.</p>
+      <div class="modal-types" id="modal-types">
+        <button class="type-tile" id="tile-alive" onclick="selectType('alive')">
+          <span class="type-icon alive-col">✦</span>
+          <div class="type-name">Living Profile</div>
+          <div class="type-desc">Map yourself — your voice, values, and world — in rich detail.</div>
+        </button>
+        <button class="type-tile" id="tile-deceased" onclick="selectType('deceased')">
+          <span class="type-icon mem-col">◆</span>
+          <div class="type-name">In Memoriam</div>
+          <div class="type-desc">Honour someone you've loved and lost by preserving everything they were.</div>
+        </button>
       </div>
-
-      <div id="modal-step-name" style="display:none">
+      <div class="modal-name-wrap" id="modal-name-wrap" style="display:none">
         <div class="form-group">
           <label class="form-label" id="modal-name-label">Name</label>
-          <input type="text" class="form-input" id="modal-name" placeholder="Full name..." onkeydown="if(event.key==='Enter')confirmCreate()">
+          <input class="form-input" type="text" id="modal-name" placeholder="Full name..."
+            onkeydown="if(event.key==='Enter')confirmCreate()">
+          <div class="field-err" id="modal-name-err"></div>
         </div>
-        <div id="modal-name-error" class="form-error" style="display:none;margin-top:8px"></div>
       </div>
-
-      <div style="display:flex;gap:8px;margin-top:1.5rem">
+      <div class="modal-actions">
         <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
-        <button class="btn btn-primary" id="modal-confirm" onclick="confirmCreate()" style="display:none;flex:1">Create profile →</button>
+        <button class="btn btn-primary" id="modal-confirm" onclick="confirmCreate()" style="display:none;flex:1">
+          Create profile →
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- ═══ VIEWS ═══ -->
+  <!-- ══════════ VIEWS ══════════ -->
 
   <!-- HOME -->
-  <section class="view active" id="view-home" aria-label="Home">
-    <div class="home-hero">
-      <div class="echo-title" aria-label="Echo">ECHO</div>
-      <p class="home-tagline">Every voice deserves to last.<br>Preserve the essence of a life — or your own.</p>
+  <section class="view active" id="view-home">
+    <div class="hero">
+      <div class="hero-eyebrow">AI · Memory · Identity</div>
+      <h1 class="hero-title" id="hero-title">ECHO</h1>
+      <p class="hero-sub">Every voice deserves to last.<br>Preserve the essence of a life — or your own.</p>
       <div class="waveform" id="waveform" aria-hidden="true"></div>
-      <div class="home-cards">
-        <div class="home-type-card" onclick="homeStart('alive')">
-          <span class="home-card-icon alive-icon">✦</span>
-          <div class="home-card-title">Living Profile</div>
-          <div class="home-card-desc">Map yourself — your voice, values, and world — in rich detail.</div>
-        </div>
-        <div class="home-type-card" onclick="homeStart('deceased')">
-          <span class="home-card-icon deceased-icon">◆</span>
-          <div class="home-card-title">In Memoriam</div>
-          <div class="home-card-desc">Honour someone you've lost by preserving everything they were.</div>
-        </div>
+      <div class="hero-cards">
+        <button class="hero-card" onclick="homeStart('alive')">
+          <span class="hero-card-icon alive-col">✦</span>
+          <div class="hero-card-title">Living Profile</div>
+          <div class="hero-card-desc">Map yourself now — for the AI tools of tomorrow.</div>
+          <div class="hero-card-cta">Start →</div>
+        </button>
+        <button class="hero-card featured" onclick="homeStart('deceased')">
+          <span class="hero-card-icon mem-col">◆</span>
+          <div class="hero-card-title">In Memoriam</div>
+          <div class="hero-card-desc">Honour someone gone by capturing who they truly were.</div>
+          <div class="hero-card-cta">Begin →</div>
+        </button>
       </div>
-      <p class="home-footnote">Your data stays on your device. Exported as JSON for AI use.</p>
+      <p class="hero-note">Free · Private · Yours. Data stored locally and exported as JSON.</p>
     </div>
   </section>
 
   <!-- AUTH -->
-  <section class="view" id="view-auth" aria-label="Authentication">
-    <div class="auth-wrap">
-      <div class="glass-card auth-card">
-        <div class="auth-logo">ECHO</div>
-        <p class="auth-subtitle" id="auth-subtitle">Sign in to your account</p>
-        <div class="auth-tabs" role="tablist">
-          <button class="auth-tab active" id="tab-login" role="tab" aria-selected="true" onclick="setAuthMode('login')">Log in</button>
-          <button class="auth-tab" id="tab-register" role="tab" aria-selected="false" onclick="setAuthMode('register')">Register</button>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:14px">
+  <section class="view" id="view-auth">
+    <div class="auth-scene">
+
+      <!-- LOGIN PANEL -->
+      <div class="auth-panel glass" id="auth-login-panel">
+        <div class="auth-brand">ECHO</div>
+        <h2 class="auth-heading">Welcome back</h2>
+        <p class="auth-sub">Sign in to your account</p>
+
+        <div class="auth-fields">
           <div class="form-group">
-            <label class="form-label" for="auth-user">Username</label>
-            <input type="text" class="form-input" id="auth-user" autocomplete="username" placeholder="your_username" onkeydown="if(event.key==='Enter')document.getElementById('auth-pass').focus()">
+            <label class="form-label" for="li-user">Username or Email</label>
+            <input class="form-input" type="text" id="li-user"
+              autocomplete="username" placeholder="username or email@address.com"
+              onkeydown="if(event.key==='Enter')document.getElementById('li-pass').focus()">
+            <div class="field-err" id="li-user-err"></div>
           </div>
+
           <div class="form-group">
-            <label class="form-label" for="auth-pass">Password</label>
-            <input type="password" class="form-input" id="auth-pass" autocomplete="current-password" placeholder="at least 6 characters" onkeydown="if(event.key==='Enter')doAuth()">
+            <label class="form-label" for="li-pass">Password</label>
+            <div class="pwd-wrap">
+              <input class="form-input" type="password" id="li-pass"
+                autocomplete="current-password" placeholder="Your password"
+                onkeydown="if(event.key==='Enter')doLogin()">
+              <button class="pwd-eye" type="button" onclick="togglePwd('li-pass','li-eye')" aria-label="Show password">
+                <svg id="li-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-err" id="li-pass-err"></div>
           </div>
-          <div class="form-error" id="auth-error" style="display:none" role="alert"></div>
-          <button class="btn btn-primary" id="auth-btn" onclick="doAuth()" style="width:100%;padding:12px;font-size:15px">Log in</button>
+
+          <div class="form-err-box" id="li-error" style="display:none" role="alert"></div>
+
+          <button class="btn btn-primary auth-btn" id="li-btn" onclick="doLogin()">Sign in</button>
         </div>
-        <p class="auth-note" id="auth-note"></p>
+
+        <p class="auth-switch">
+          Don't have an account?
+          <button class="link-btn" onclick="switchAuth('signup')">Create one →</button>
+        </p>
       </div>
+
+      <!-- SIGNUP PANEL -->
+      <div class="auth-panel glass" id="auth-signup-panel" style="display:none">
+        <div class="auth-brand">ECHO</div>
+        <h2 class="auth-heading">Create your Echo</h2>
+        <p class="auth-sub">Your permanent digital presence starts here</p>
+
+        <div class="auth-fields">
+          <div class="form-row-2">
+            <div class="form-group">
+              <label class="form-label" for="su-name">Full Name</label>
+              <input class="form-input" type="text" id="su-name"
+                autocomplete="name" placeholder="Your full name">
+              <div class="field-err" id="su-name-err"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="su-user">Username</label>
+              <input class="form-input" type="text" id="su-user"
+                autocomplete="username" placeholder="unique_handle"
+                oninput="this.value=this.value.toLowerCase().replace(/[^a-z0-9_]/g,'')">
+              <div class="field-err" id="su-user-err"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="su-email">Email Address</label>
+            <input class="form-input" type="email" id="su-email"
+              autocomplete="email" placeholder="you@example.com">
+            <div class="field-err" id="su-email-err"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="su-pass">Password</label>
+            <div class="pwd-wrap">
+              <input class="form-input" type="password" id="su-pass"
+                autocomplete="new-password" placeholder="Minimum 8 characters"
+                oninput="liveStrength(this.value)">
+              <button class="pwd-eye" type="button" onclick="togglePwd('su-pass','su-eye')" aria-label="Show password">
+                <svg id="su-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="strength-wrap">
+              <div class="strength-track"><div class="strength-fill" id="strength-fill"></div></div>
+              <div class="strength-label" id="strength-label"></div>
+            </div>
+            <div class="field-err" id="su-pass-err"></div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="su-confirm">Confirm Password</label>
+            <div class="pwd-wrap">
+              <input class="form-input" type="password" id="su-confirm"
+                autocomplete="new-password" placeholder="Repeat your password"
+                onkeydown="if(event.key==='Enter')doSignup()">
+              <button class="pwd-eye" type="button" onclick="togglePwd('su-confirm','su-con-eye')" aria-label="Show password">
+                <svg id="su-con-eye" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+              </button>
+            </div>
+            <div class="field-err" id="su-confirm-err"></div>
+          </div>
+
+          <div class="form-err-box" id="su-error" style="display:none" role="alert"></div>
+
+          <button class="btn btn-primary auth-btn" id="su-btn" onclick="doSignup()">Create account →</button>
+
+          <p class="auth-privacy">
+            🔒 Passwords are hashed locally using SHA-256. No data leaves your device.
+          </p>
+        </div>
+
+        <p class="auth-switch">
+          Already have an account?
+          <button class="link-btn" onclick="switchAuth('login')">Sign in →</button>
+        </p>
+      </div>
+
     </div>
   </section>
 
   <!-- DASHBOARD -->
-  <section class="view" id="view-dashboard" aria-label="Your profiles">
+  <section class="view" id="view-dashboard">
     <div class="dash-wrap">
       <div class="dash-header">
         <div>
-          <h1 id="dash-greeting" style="font-size:26px;font-weight:600;margin-bottom:4px"></h1>
-          <p id="dash-sub" style="font-size:14px;color:var(--w50)"></p>
+          <h1 id="dash-greeting" class="dash-greeting"></h1>
+          <p id="dash-sub" class="dash-sub"></p>
         </div>
         <button class="btn btn-primary" onclick="openModal()">+ New profile</button>
       </div>
@@ -139,17 +238,17 @@
   </section>
 
   <!-- QUESTIONNAIRE -->
-  <section class="view" id="view-questionnaire" aria-label="Questionnaire">
+  <section class="view" id="view-questionnaire">
     <div class="q-layout">
-      <aside class="q-sidebar" id="q-sidebar" aria-label="Categories"></aside>
+      <aside class="q-sidebar" id="q-sidebar" aria-label="Question categories"></aside>
       <main class="q-main" id="q-main"></main>
     </div>
   </section>
 
   <!-- PROFILE VIEW -->
-  <section class="view" id="view-profile" aria-label="Profile view">
-    <div class="profile-view-wrap">
-      <div class="profile-view-inner" id="profile-view-inner"></div>
+  <section class="view" id="view-profile">
+    <div class="pv-wrap">
+      <div id="pv-inner"></div>
     </div>
   </section>
 
