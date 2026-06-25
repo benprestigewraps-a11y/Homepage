@@ -107,6 +107,64 @@
   requestAnimationFrame(drawBG);
 })();
 
+
+/* ==================================
+   FOOTER TEXT ROTATION
+================================== */
+
+const footerPhrases = [
+
+    "PRESERVE EVERY VOICE",
+
+    "DIGITAL IMMORTALITY",
+
+    "EVERY MEMORY MATTERS",
+
+    "YOUR STORY NEVER ENDS",
+
+    "REMEMBER FOREVER",
+
+    "BUILD YOUR ECHO",
+
+    "MEMORIES MADE IMMORTAL"
+
+];
+
+function updateFooterBanner(){
+
+    const track = document.getElementById("footer-track");
+
+    if(!track) return;
+
+    let html = "";
+
+    footerPhrases.forEach(text => {
+
+        html += `
+            <span>${text}</span>
+            <span>✦</span>
+        `;
+
+    });
+
+    footerPhrases.forEach(text => {
+
+        html += `
+            <span>${text}</span>
+            <span>✦</span>
+        `;
+
+    });
+
+    track.innerHTML = html;
+}
+
+document.addEventListener(
+    "DOMContentLoaded",
+    updateFooterBanner
+);
+
+
 /* ══════════════════════════════════════
    QUESTION BANKS
 ══════════════════════════════════════ */
