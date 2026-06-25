@@ -343,6 +343,131 @@ a { text-decoration:none; cursor:pointer; }
   animation:viewIn 0.6s 0.9s both;
 }
 
+
+/* ==========================
+   VIDEO SECTION
+========================== */
+
+.feature-video-section{
+    width:100%;
+    max-width:1400px;
+    margin:3rem auto;
+}
+
+.video-frame{
+    overflow:hidden;
+
+    clip-path:polygon(
+        40px 0,
+        calc(100% - 40px) 0,
+        100% 40px,
+        100% calc(100% - 40px),
+        calc(100% - 40px) 100%,
+        40px 100%,
+        0 calc(100% - 40px),
+        0 40px
+    );
+
+    border:1px solid rgba(255,255,255,.12);
+
+    background:rgba(255,255,255,.03);
+
+    backdrop-filter:blur(20px);
+}
+
+.video-frame video{
+    width:100%;
+    display:block;
+}
+
+/* ==========================
+   PRICING
+========================== */
+
+.pricing-section{
+    width:100%;
+    max-width:1400px;
+    margin:4rem auto;
+}
+
+.pricing-title{
+    text-align:center;
+    font-family:'Space Grotesk',sans-serif;
+    font-size:clamp(32px,4vw,54px);
+    margin-bottom:2rem;
+}
+
+.pricing-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:24px;
+}
+
+.pricing-card{
+    background:rgba(255,255,255,.03);
+
+    border:1px solid rgba(255,255,255,.1);
+
+    border-radius:24px;
+
+    padding:2rem;
+
+    backdrop-filter:blur(20px);
+
+    transition:.3s;
+}
+
+.pricing-card:hover{
+    transform:translateY(-6px);
+
+    border-color:rgba(255,255,255,.2);
+}
+
+.featured-plan{
+    border-color:#00c060;
+
+    box-shadow:
+        0 0 50px rgba(0,192,96,.15);
+}
+
+.plan-name{
+    font-family:'Space Grotesk',sans-serif;
+    letter-spacing:.2em;
+    margin-bottom:1rem;
+}
+
+.plan-price{
+    font-size:48px;
+    font-weight:700;
+    margin-bottom:1.5rem;
+}
+
+.plan-price span{
+    font-size:16px;
+    opacity:.6;
+}
+
+.plan-features{
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+
+    margin-bottom:2rem;
+}
+
+.plan-features li{
+    color:rgba(255,255,255,.75);
+}
+
+@media (max-width:900px){
+
+    .pricing-grid{
+        grid-template-columns:1fr;
+    }
+}
+
+
+
 /* ══════════════════════════════════════
    AUTH
 ══════════════════════════════════════ */
