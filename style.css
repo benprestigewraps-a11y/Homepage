@@ -484,7 +484,7 @@ a { text-decoration:none; cursor:pointer; }
 .hero-card {
   background:var(--w03); border:1px solid var(--w10);
   border-radius:var(--rad-lg); padding:1.75rem 1.5rem;
-  width:240px; text-align:center; cursor:pointer;
+  width:560px; text-align:center; cursor:pointer;
   transition:all 0.3s cubic-bezier(0.16,1,0.3,1);
   backdrop-filter:blur(12px); display:flex; flex-direction:column; gap:8px;
 }
